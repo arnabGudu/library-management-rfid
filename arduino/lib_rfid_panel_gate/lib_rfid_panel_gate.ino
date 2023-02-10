@@ -3,9 +3,10 @@
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 #include <ESP8266HTTPClient.h>
+#define BUZZ_PIN D4
 
 constexpr uint8_t RST_PIN1 = D2, RST_PIN2 = D1;
-constexpr uint8_t SS_PIN1 = D8, SS_PIN2 = D4;
+constexpr uint8_t SS_PIN1 = D8, SS_PIN2 = D3;
 
 MFRC522 rfid1(SS_PIN1, RST_PIN1);
 MFRC522 rfid2(SS_PIN2, RST_PIN2);
@@ -19,6 +20,8 @@ void setup() {
   SPI.begin();
   rfid1.PCD_Init();
   rfid2.PCD_Init();
+  pinMode(BUZZ_PIN, OUTPUT);
+  digitalWrite(BUZZ_PIN, HIGH);
 
   WiFi.begin("JioFiber-xDPSy", "gudusanu");
   Serial.print("Connecting");
@@ -43,6 +46,11 @@ void httpRequest(String type, String id) {
 
         if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
           String payload = http.getString();
+          if (type == "gate" && payload == "ALERT") {
+            digitalWrite(BUZZ_PIN, LOW);
+            delay(5000);
+            digitalWrite(BUZZ_PIN, HIGH);
+          }
           Serial.println(payload);
         }
       } else {
