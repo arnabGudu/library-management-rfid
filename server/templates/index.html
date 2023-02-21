@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Flask Docker</title>
+</head>
+<body>
+    <nav>
+        <a href="/">Home</a>
+        <a href="/about">About</a>
+    </nav>
+    <div id="main-section">
+        <nav>
+
+        </nav>
+        <div id="rightside-panel">
+            <div id="display-message-section">
+
+            </div>
+
+            <div id="input-area">
+                <input type="text" id="input-text" placeholder="Enter your message here">
+                <button id="send-button">Send</button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- SocketIO JS -->
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
+
+    <!-- Custom SocketIO JS -->
+    <script src="{{ url_for('static', filename='scripts/socketio.js') }}"></script>
+</body>
+</html>
