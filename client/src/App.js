@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from "react"
-import BooksTable from "./components/BooksTable"
+import React from 'react';
+import HomePage from './components/HomePage';
 
 const App = () => {
   return (
     <div className="App">
-      <BooksTable />
+      <HomePage />
     </div>
-  )
+  );
 }
-export default App
+
+export default App;
