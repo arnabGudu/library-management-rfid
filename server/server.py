@@ -27,35 +27,33 @@ def handle_user(roll):
         row['books'] = sql(f"SELECT * FROM BOOKS WHERE issuedTo = '{roll}'")
         socketIo.emit('user', row, broadcast=True)
 
-@app.route('/book')
-def book():
-    return render_template('book.html')
-
-@app.route('/book', methods=['POST'])
-def book_form_post():
-    id = request.form['text']
+def handle_book(id):
     rows = sql(f"SELECT * FROM BOOKS WHERE id = '{id}'")
     for row in rows:
-        if row['issuedTo'] == 'NULL' or row['issuedTo'] == 'None':
+        if row['issuedTo'] == 'NULL':
             socketIo.emit('add', row, broadcast=True)
         else:
             socketIo.emit('return', row, broadcast=True)
-    return render_template('book.html')
 
-@app.route('/user')
-def user():
-    return render_template('user.html')
-    
-@app.route('/user', methods=['POST'])
-def user_form_post():
-    roll = request.form['text']
-    handle_user(roll)
-    return render_template('user.html')
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/', methods=['POST'])
+def index_form_post():
+    text = request.form['text']
+    if len(sql(f"SELECT * FROM STUDENTS WHERE roll = '{text}'")):
+        print('user', text)
+        handle_user(text)
+    elif len(sql(f"SELECT * FROM BOOKS WHERE id = '{text}'")):
+        print('book', text)
+        handle_book(text)
+    return render_template('index.html')
 
 @socketIo.on('issue')
 def handle_issue(rows):
     for row in rows:
-        sql(f"UPDATE BOOKS SET issuedTo = '{row['issuedTo']}', issueDate = DATE('NOW'), returnDate = DATE('NOW', '+14 days') WHERE id = '{row['id']}'")
+        sql(f"UPDATE BOOKS SET issuedTo = '{row['issuedTo']}', issueDate = STRFTIME('%d-%m-%Y', 'NOW', 'LOCALTIME'), returnDate = STRFTIME('%d-%m-%Y', 'NOW', 'LOCALTIME', '+14 days') WHERE id = '{row['id']}'")
     handle_user(rows[0]['issuedTo'])
 
 @socketIo.on('returned')
@@ -64,8 +62,8 @@ def handle_return(row):
     sql(f"UPDATE BOOKS SET issuedTo = 'NULL', issueDate = 'NULL', returnDate = 'NULL' WHERE id = '{row['id']}'")
 
 @socketIo.on('reissue')
-def handle_return(row):
-    socketIo.emit('add', row, broadcast=True)
+def handle_reissue(row):
+    handle_issue([row])
 
 @socketIo.on('connect')
 def handle_connect():
@@ -78,8 +76,7 @@ def handle_disconnect():
 @socketIo.on("message")
 def handleMessage(msg):
     print(msg)
-    send(msg, broadcast=True)    
-    return None
+    send(msg, broadcast=True)
 
 if __name__ == '__main__':
     socketIo.run(app, host='localhost', debug=True)

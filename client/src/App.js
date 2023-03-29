@@ -1,12 +1,36 @@
-import React from 'react';
-import HomePage from './components/HomePage';
+import React, { useState, useEffect } from 'react'
+import io from 'socket.io-client'
+import Login from './pages/Login'
+import Dashboard from './pages/Dashboard'
+import './App.css'
+
+const ENDPOINT = "http://localhost:5000"
 
 const App = () => {
+  const [loggedIn, setLoggedIn] = useState(false)
+  const [socket, setSocket] = useState(null)
+  const [user, setUser] = useState(null)
+
+  useEffect(() => {
+    setSocket(io(ENDPOINT))
+  }, [])
+
+  const handleLogin = () => {
+    setLoggedIn(true)
+  }
+
+  const handleLogout = () => {
+    setLoggedIn(false)
+  }
+
   return (
     <div className="App">
-      <HomePage />
+      {loggedIn ? 
+        <Dashboard handleLogout={handleLogout} user={user} socket={socket}/> : 
+        <Login handleLogin={handleLogin} setUser={setUser} socket={socket} />
+      }
     </div>
-  );
+  )
 }
 
-export default App;
+export default App

@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react'
 import DataTable from 'react-data-table-component'
+import Swal from 'sweetalert2'
 import 'bootstrap/dist/css/bootstrap.css'
 import './IssueTable.css'
 
-const IssueTable = ({ user, socket }) => {
+const IssueTable = ({ user, socket, onLogout}) => {
   const [books, setBook] = useState([])
 
   const handleDelete = (row) => {
-    setBook(books => books.filter(book => book.id !== row.id));
+    setBook(books => books.filter(book => book.id !== row.id))
   }
 
   const handleIssue = () => {
@@ -15,10 +16,17 @@ const IssueTable = ({ user, socket }) => {
       return
     }
     const newBooks = books.map(book => {
-      return { ...book, issuedTo: user.roll };
-    });
-    setBook([]);
-    alert('Books issued successfully')
+      return { ...book, issuedTo: user.roll }
+    })
+    setBook([])
+    Swal.fire({
+      title: 'Success',
+      text: 'Books issued successfully',
+      icon: 'success',
+      timer: 3000,
+      timerProgressBar: true,
+      showConfirmButton: true
+    })
     socket.emit('issue', newBooks)
   }
 
@@ -40,12 +48,12 @@ const IssueTable = ({ user, socket }) => {
     },
     {
       name: 'Issue Date',
-      selector: (row) => row.issue_date,
+      selector: (row) => row.issueDate,
       sortable: true,
     },
     {
         name: 'Return Date',
-        selector: (row) => row.return_date,
+        selector: (row) => row.returnDate,
         sortable: true,
     },
     {
@@ -57,7 +65,7 @@ const IssueTable = ({ user, socket }) => {
   ]
     
   useEffect(() => {
-    let isMounted = true;
+    let isMounted = true
     socket.on('add', newBook => {
       if (isMounted) {
         setBook(books => {
@@ -65,14 +73,16 @@ const IssueTable = ({ user, socket }) => {
           if (isExisting) {
             return books.filter(book => book.id !== newBook.id)
           }
+
+          newBook.issueDate = new Date().toLocaleDateString().replace(/\//g, '-')
+          newBook.returnDate = new Date(new Date().getTime() + 15 * 24 * 60 * 60 * 1000).toLocaleDateString().replace(/\//g, '-')
           return [...books, newBook]
         })
       }
     })
 
     return () => {
-      isMounted = false;
-      // socket.disconnect()
+      isMounted = false
     }
   }, [socket])
 
@@ -87,7 +97,7 @@ const IssueTable = ({ user, socket }) => {
         highlightOnHover
       />
       <button className="btn btn-success issue_button" onClick={() => handleIssue()}>Proceed</button>
-      <button className="btn btn-danger cancel_button" onClick={() => handleIssue()}>Cancel</button>
+      <button className="btn btn-danger cancel_button" onClick={() => onLogout()}>Cancel</button>
     </div>
   )
 }

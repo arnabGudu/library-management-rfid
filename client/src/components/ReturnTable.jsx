@@ -1,17 +1,43 @@
 import React, { useState, useEffect } from 'react'
 import DataTable from 'react-data-table-component'
+import Swal from 'sweetalert2'
 import 'bootstrap/dist/css/bootstrap.css'
 
 const ReturnTable = ({ user, socket }) => {
     const [books, setBook] = useState([])
 
     const handleReissue = (row) => {
-        setBook(books => books.filter(book => book.id !== row.id));
-        socket.emit('reissue', row);
+        if (new Date(row.returnDate) > new Date()) {
+            Swal.fire({
+                title: 'Success',
+                text: 'Book reissued successfully',
+                icon: 'success',
+                timer: 3000,
+                timerProgressBar: true,
+                showConfirmButton: true
+            })
+            socket.emit('reissue', row)
+        } else {
+            Swal.fire({
+                title: 'Failure',
+                text: 'Due date is over, cannot reissue',
+                icon: 'error',
+                timer: 3000,
+                timerProgressBar: true,
+                showConfirmButton: true
+            })
+        }
     }
 
     const handleReturn = (row) => {
-        alert('Scan book to return');
+        Swal.fire({
+            title: 'Return',
+            text: 'Please scan book to return',
+            icon: 'info',
+            timer: 3000,
+            timerProgressBar: true,
+            showConfirmButton: true
+        })
     }
 
     const columns = [
@@ -61,14 +87,18 @@ const ReturnTable = ({ user, socket }) => {
     }, [user.books])
 
     useEffect(() => {
-        let isMounted = true;
+        let isMounted = true
         socket.on('return', returnBook => {
             if (isMounted) {
                 setBook(books => {
                     const isExisting = books.some(book => book.id === returnBook.id)
                     if (isExisting) {
                         socket.emit('returned', returnBook)
-                        alert('Book returned successfully')
+                        Swal.fire(
+                            'Return Process [ 1 / 2 ]',
+                            'Please keep the book on respective shelf to complete the return process',
+                            'success'
+                        )
                         return books.filter(book => book.id !== returnBook.id)
                     }
                 })
@@ -76,14 +106,13 @@ const ReturnTable = ({ user, socket }) => {
         })
 
         return () => {
-            isMounted = false;
-            // socket.disconnect()
+            isMounted = false
         }
     }, [socket])
 
     return (
         <DataTable
-            title="Books Issued"
+            title="Last Issued Books"
             columns={columns}
             data={books}
             fixedHeader

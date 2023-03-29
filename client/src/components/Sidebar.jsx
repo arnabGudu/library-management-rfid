@@ -1,11 +1,12 @@
-import React from 'react';
-import './Sidebar.css';
+import React from 'react'
+import userLogo from "../assets/user.png"
+import './Sidebar.css'
 
 const Sidebar = ({ user, onLogout }) => {
     return (
         <div className="sidebar">
             <div className="sidebar-user">
-                <img src="user.png" alt="demo" className="sidebar-avatar" />
+                <img src={userLogo} alt="user" className="sidebar-avatar" />
                 <div className="sidebar-user-info">
                     <h4 className="sidebar-user-name">{user.name}</h4>
                     <p className="sidebar-user-email">{user.roll}</p>
@@ -26,7 +27,7 @@ const Sidebar = ({ user, onLogout }) => {
                 </li>
             </ul>
         </div>
-    );
-};
+    )
+}
 
-export default Sidebar;
+export default Sidebar
