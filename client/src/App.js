@@ -4,7 +4,7 @@ import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import './App.css'
 
-const ENDPOINT = "http://localhost:5000"
+const ENDPOINT = "http://192.168.29.192:3000"
 
 const App = () => {
   const [loggedIn, setLoggedIn] = useState(false)

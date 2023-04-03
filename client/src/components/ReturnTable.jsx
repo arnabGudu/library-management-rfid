@@ -7,7 +7,9 @@ const ReturnTable = ({ user, socket }) => {
     const [books, setBook] = useState([])
 
     const handleReissue = (row) => {
-        if (new Date(row.returnDate) > new Date()) {
+        const returnDate = new Date(row.returnDate)
+        const currentDate = new Date()
+        if (returnDate.getTime() > currentDate.getTime()) {
             Swal.fire({
                 title: 'Success',
                 text: 'Book reissued successfully',
@@ -40,6 +42,14 @@ const ReturnTable = ({ user, socket }) => {
         })
     }
 
+    const formatDate = (dateStr) => {
+        const date = new Date(dateStr);
+        const day = date.getDate().toString().padStart(2, "0");
+        const month = (date.getMonth() + 1).toString().padStart(2, "0");
+        const year = date.getFullYear().toString();
+        return `${day}-${month}-${year}`;
+    }
+
     const columns = [
         {
             name: 'Book ID',
@@ -58,12 +68,12 @@ const ReturnTable = ({ user, socket }) => {
         },
         {
             name: 'Issue Date',
-            selector: (row) => row.issueDate,
+            selector: (row) => formatDate(row.issueDate),
             sortable: true,
         },
         {
             name: 'Return Date',
-            selector: (row) => row.returnDate,
+            selector: (row) => formatDate(row.returnDate),
             sortable: true,
         },
         {

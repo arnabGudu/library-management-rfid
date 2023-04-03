@@ -9,8 +9,8 @@ const Sidebar = ({ user, onLogout }) => {
                 <img src={userLogo} alt="user" className="sidebar-avatar" />
                 <div className="sidebar-user-info">
                     <h4 className="sidebar-user-name">{user.name}</h4>
-                    <p className="sidebar-user-email">{user.roll}</p>
-                    <p className='sidebar-user-email'>{user.dept}</p>
+                    <p className="sidebar-user-roll">Roll: {user.roll}</p>
+                    <p className='sidebar-user-dept'>Dept: {user.dept}</p>
                 </div>
             </div>
             <ul className="sidebar-nav">
