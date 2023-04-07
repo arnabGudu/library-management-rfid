@@ -22,41 +22,61 @@ def sql(query):
     conn.close()
     return data
 
-def handle_student(rows):
-    for row in rows:
-        print('student', row['roll'])
-        row['books'] = sql(f"SELECT * FROM BOOKS WHERE issuedTo = '{row['roll']}'")
-        socketIo.emit('user', row, broadcast=True)
+def handle_user(user):
+    user['book'] = sql(f"SELECT * from book_status INNER JOIN book ON book.id = book_status.book_id WHERE student_id = '{user['roll']}';")
+    socketIo.emit('user', user, broadcast=True)    
 
-def handle_book(rows):
-    for row in rows:
-        print('book', row['id'])
-        if row['issuedTo'] == 'NULL':
-            socketIo.emit('add', row, broadcast=True)
-        else:
-            socketIo.emit('return', row, broadcast=True)
-
+############################################ API ############################################
 @app.route('/panel/id=<int:rfid>', methods=['GET'])
 def handle_panel(rfid):
-    print('panel', rfid)
-    students = sql(f"SELECT * FROM STUDENTS WHERE rfid = '{rfid}'")
-    books = sql(f"SELECT * FROM BOOKS WHERE rfid = '{rfid}'")
-    if len(students) and len(books):
+    user = sql(f"SELECT * FROM student WHERE rfid = '{rfid}'")
+    book = sql(f"SELECT * FROM book_status INNER JOIN book ON book_status.book_id = book.id WHERE rfid = '{rfid}'")
+
+    if len(user) and len(book):
         raise Exception('Student and book cannot have same RFID')
-    elif len(students):
-        handle_student(students)
-    elif len(books):
-        handle_book(books)
+    elif len(user):
+        print('panel -> user: ', user[0]['roll'])
+        handle_user(user[0])
+    elif len(book):
+        print('panel -> book: ', book[0]['book_id'])
+        socketIo.emit('book', book[0], broadcast=True)
+    else:
+        return 'NA'
     return 'OK'
 
 @app.route('/gate/id=<int:rfid>', methods=['GET'])
 def handle_gate(rfid):
     print('gate', rfid)
-    book = sql(f"SELECT * FROM BOOKS WHERE rfid = '{rfid}'")
-    if len(book) and book[0]['issuedTo'] == 'NULL':
+    book = sql(f"SELECT * FROM book_status WHERE rfid = '{rfid}'")
+    if len(book) and book[0]['student_id'] == 'NULL':
         print('Book is not issued')
         return 'ALERT'
     return 'OK'
+
+@app.route('/<string:shelf>/id=<int:rfid>', methods=['GET'])
+def handle_return(shelf, rfid):
+    print('return', rfid)
+    row = sql(f"SELECT * FROM book_status INNER JOIN book ON book_status.book_id = book.id WHERE rfid = '{rfid}'")
+    if len(row) == 0:
+        print('RFID not found')
+        return 'NA'
+    
+    row = row[0]
+    print(row)
+    if row['pending'] == 1:
+        if row['shelf'] != shelf:
+            print('Book is not for this shelf')
+            return 'ALERT'
+        
+        print('Book is good to return')
+        sql(f"UPDATE book_status SET pending = 0, student_id = 'NULL', issue_date = 'NULL', return_date = 'NULL' WHERE rfid = '{rfid}'")
+        user = sql(f"SELECT * FROM student WHERE roll = '{row['student_id']}'")
+        handle_user(user[0])
+        return 'OK'
+    
+    print('Book is not issued')
+    return 'NA'
+
 
 @app.route('/')
 def index():
@@ -64,28 +84,25 @@ def index():
 
 @app.route('/', methods=['POST'])
 def index_form_post():
-    text = request.form['text']
-    students = sql(f"SELECT * FROM STUDENTS WHERE roll = '{text}'")
-    books = sql(f"SELECT * FROM BOOKS WHERE id = '{text}'")
-    if len(students) and len(books):
-        raise Exception('Student and book cannot have same RFID')
-    elif len(students):
-        handle_student(students)
-    elif len(books):
-        handle_book(books)
+    rfid = request.form['rfid']
+    handle_panel(rfid)
     return render_template('index.html')
 
+############################################ Socket ############################################
 @socketIo.on('issue')
 def handle_issue(rows):
     for row in rows:
-        sql(f"UPDATE BOOKS SET issuedTo = '{row['issuedTo']}', issueDate = DATE('NOW', 'LOCALTIME'), returnDate = DATE('NOW', 'LOCALTIME', '+14 days') WHERE id = '{row['id']}'")
-    row = sql(f"SELECT * FROM STUDENTS WHERE roll = '{rows[0]['issuedTo']}'")
-    handle_student(row)
+        print('issue', row)
+        sql(f"UPDATE book_status SET student_id = '{row['student_id']}', issue_date = DATE('NOW', 'LOCALTIME'), return_date = DATE('NOW', 'LOCALTIME', '+14 days'), pending = 0 WHERE rfid = '{row['rfid']}'")
+    user = sql(f"SELECT * FROM student WHERE roll = '{rows[0]['student_id']}'")
+    handle_user(user[0])
 
-@socketIo.on('returned')
-def handle_return(row):
-    print('returned', row)
-    sql(f"UPDATE BOOKS SET issuedTo = 'NULL', issueDate = 'NULL', returnDate = 'NULL' WHERE id = '{row['id']}'")
+@socketIo.on('pending')
+def handle_pending(row):
+    print('pending', row)
+    sql(f"UPDATE book_status SET pending = 1 WHERE rfid = '{row['rfid']}'")
+    user = sql(f"SELECT * FROM student WHERE roll = '{row['student_id']}'")
+    handle_user(user[0])
 
 @socketIo.on('reissue')
 def handle_reissue(row):
@@ -93,6 +110,8 @@ def handle_reissue(row):
 
 @socketIo.on('connect')
 def handle_connect():
+    book = sql(f"SELECT * FROM book;")
+    socketIo.emit('booklist', book, broadcast=True)
     print('Client connected')
 
 @socketIo.on('disconnect')
@@ -104,6 +123,8 @@ def handleMessage(msg):
     print(msg)
     send(msg, broadcast=True)
 
+
+############################################ Main ############################################
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--host', type=str, default='localhost')
