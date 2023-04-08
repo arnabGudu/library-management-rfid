@@ -57,15 +57,18 @@ const Main = ({ handleLogout, socket, user, bookList }) => {
     <div style={{ display: 'flex', height: '100vh' }}>
       <Sidebar>
         <div style={{ padding: '2vw', display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '1vh', marginBottom: '0vh', textAlign: 'center' }}>
-          <img src='assets/user.png' alt="user" style={{ width: '80%', height: '80%', objectFit: 'contain', marginBottom: '4vh' }} />
+          <div style={{ width: '150px', height: '150px', borderRadius: '50%', overflow: 'hidden', marginBottom: '3vh'}}>
+            <img src={`assets/avatars/${user.roll}.png`} alt='Not found' style={{ width: '100%', height: '100%'}} 
+                 onError={({ currentTarget }) => { currentTarget.onerror = null; currentTarget.src="assets/user.png"; }}/>
+          </div>
           <h4>{user.first_name} {user.last_name}</h4>
           <p>{user.roll}</p>
           <p style={{ fontSize: '0.9rem', marginTop: '-10px' }}>{user.dept}</p>
         </div>
         <Menu>
-          <MenuItem icon={<IoMdSpeedometer />} onClick={() => handleMenuItemClick('issuebook')} active={selectedMenuItem === 'issuebook'}>Issue Book</MenuItem>
-          <MenuItem icon={<IoMdReturnLeft />} onClick={() => handleMenuItemClick('returnbook')} active={selectedMenuItem === 'returnbook'}>Return Book</MenuItem>
-          <MenuItem icon={<IoMdPeople />} onClick={() => handleMenuItemClick('aboutus')} active={selectedMenuItem === 'aboutus'}>About Us</MenuItem>
+          <MenuItem icon={<IoMdSpeedometer />} onClick={() => handleMenuItemClick('issuebook')} style={selectedMenuItem === 'issuebook' ? {backgroundColor: '#ECECEC'} : {}}>Issue Book</MenuItem>
+          <MenuItem icon={<IoMdReturnLeft />} onClick={() => handleMenuItemClick('returnbook')} style={selectedMenuItem === 'returnbook' ? {backgroundColor: '#ECECEC'} : {}}>Return Book</MenuItem>
+          <MenuItem icon={<IoMdPeople />} onClick={() => handleMenuItemClick('aboutus')} style={selectedMenuItem === 'aboutus' ? {backgroundColor: '#ECECEC'} : {}}>About Us</MenuItem>
           <MenuItem icon={<IoMdLogOut />} onClick={() => onLogout()}>Logout</MenuItem>
         </Menu>
       </Sidebar>
@@ -76,7 +79,7 @@ const Main = ({ handleLogout, socket, user, bookList }) => {
           </h2>
           <div style={{ position: 'absolute', right: '10px' }}>
             <IoIosSearch style={{ position: 'absolute', top: '50%', left: '15px', transform: 'translateY(-50%)', color: 'gray' }}/>
-            <input type="text" onChange={handleSearch} placeholder="Search..." style={{ padding: '5px', borderRadius: '30px', border: '1px solid gray', paddingLeft: '40px' }}/>
+            <input type="text" onChange={handleSearch} placeholder="Search..." style={{ padding: '5px', borderRadius: '30px', border: '1px solid gray', paddingLeft: '40px', width: '20vw' }}/>
           </div>
         </div>
         <div style={{ height: '87vh', backgroundColor: 'white', padding: '3vh', borderRadius: '10px', position: 'relative' }}>

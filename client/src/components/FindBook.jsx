@@ -16,31 +16,47 @@ const FindBook = ({ bookList, query }) => {
       name: 'Book ID',
       selector: (row) => row.id,
       sortable: true,
+      wrap: true,
+      width: '8vw'
     },
     {
       name: 'Book Name',
       selector: (row) => row.title,
       sortable: true,
+      wrap: true,
     },
     {
       name: 'Author',
       selector: (row) => row.author,
       sortable: true,
+      wrap: true,
     },
     {
       name: 'Publisher',
       selector: (row) => row.publisher,
       sortable: true,
+      wrap: true,
+      width: '12vw'
     },
     {
       name: 'Publication Year',
       selector: (row) => row.publication_year,
       sortable: true,
+      width: '10vw'
     },
     {
       name: 'Shelf',
       selector: (row) => row.shelf,
       sortable: true,
+      wrap: true,
+      width: '8vw'
+    },
+    {
+      name: 'Available',
+      selector: (row) => `${row.available} / ${row.total}`,
+      sortable: true,
+      wrap: true,
+      width: '8vw'
     }
   ]
 

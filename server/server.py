@@ -24,7 +24,11 @@ def sql(query):
 
 def handle_user(user):
     user['book'] = sql(f"SELECT * from book_status INNER JOIN book ON book.id = book_status.book_id WHERE student_id = '{user['roll']}';")
-    socketIo.emit('user', user, broadcast=True)    
+    book = sql("SELECT book.id, book.title, book.author, book.publisher, book.publication_year, book.shelf, " \
+               "COUNT(CASE WHEN book_status.student_id IS 'NULL' THEN 1 END) AS available, COUNT(book_status.book_id) AS total " \
+               "FROM book LEFT JOIN book_status ON book.id = book_status.book_id GROUP BY book.id")
+    socketIo.emit('booklist', book, broadcast=True)
+    socketIo.emit('user', user, broadcast=True)
 
 ############################################ API ############################################
 @app.route('/panel/id=<int:rfid>', methods=['GET'])
@@ -110,8 +114,6 @@ def handle_reissue(row):
 
 @socketIo.on('connect')
 def handle_connect():
-    book = sql(f"SELECT * FROM book;")
-    socketIo.emit('booklist', book, broadcast=True)
     print('Client connected')
 
 @socketIo.on('disconnect')

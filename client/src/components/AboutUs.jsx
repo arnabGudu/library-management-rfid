@@ -16,7 +16,8 @@ function AboutUs() {
       <div style={{display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gridGap: '20px'}}>
         {people.map((person, index) => (
           <div key={index} style={{border: '1px solid #ccc', borderRadius: '5px', boxShadow: '0 2px 2px rgba(0, 0, 0, 0.3)', padding: '20px', textAlign: 'center'}}>
-            <img src={`assets/avatars/${person.roll}.png`} alt={person.name} style={{height: '100px', width: '100px'}}/>
+            <img src={`assets/avatars/${person.roll}.png`} alt={person.name} style={{height: '100px', width: '100px', borderRadius: '50%', overflow: 'hidden', marginBottom: '3vh'}}
+                 onError={({ currentTarget }) => { currentTarget.onerror = null; currentTarget.src="assets/user.png"; }}/>
             <h3>{person.name}</h3>
             <p>{person.roll}</p>
           </div>

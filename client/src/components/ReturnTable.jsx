@@ -108,9 +108,7 @@ const ReturnTable = ({ user, socket }) => {
   ]
 
   useEffect(() => {
-    if (user.book.length !== 0) {
-      setBook(user.book)
-    }
+    setBook(user.book)
   }, [user.book])
 
   useEffect(() => {
