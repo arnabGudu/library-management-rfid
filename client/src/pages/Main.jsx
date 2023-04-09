@@ -58,7 +58,7 @@ const Main = ({ handleLogout, socket, user, bookList }) => {
       <Sidebar>
         <div style={{ padding: '2vw', display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '1vh', marginBottom: '0vh', textAlign: 'center' }}>
           <div style={{ width: '150px', height: '150px', borderRadius: '50%', overflow: 'hidden', marginBottom: '3vh'}}>
-            <img src={`assets/avatars/${user.roll}.png`} alt='Not found' style={{ width: '100%', height: '100%'}} 
+            <img src={`assets/avatars/${user.first_name}.jpg`} alt='Not found' style={{ width: '100%', height: '100%'}} 
                  onError={({ currentTarget }) => { currentTarget.onerror = null; currentTarget.src="assets/user.png"; }}/>
           </div>
           <h4>{user.first_name} {user.last_name}</h4>
