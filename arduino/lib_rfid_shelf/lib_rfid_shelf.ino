@@ -17,7 +17,7 @@ void setup() {
   SPI.begin();
   rfid.PCD_Init();
 
-  WiFi.begin("JioFiber-xDPSy", "gudusanu");
+  WiFi.begin("nowifi", "gudusanu");
   Serial.print("Connecting");
   while (WiFi.status() != WL_CONNECTED) {
     delay(1000);

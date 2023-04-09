@@ -23,7 +23,7 @@ void setup() {
   pinMode(BUZZ_PIN, OUTPUT);
   digitalWrite(BUZZ_PIN, HIGH);
 
-  WiFi.begin("JioFiber-xDPSy", "gudusanu");
+  WiFi.begin("nowifi", "gudusanu");
   Serial.print("Connecting");
   while (WiFi.status() != WL_CONNECTED) {
     delay(1000);
