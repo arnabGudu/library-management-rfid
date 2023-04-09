@@ -31,7 +31,7 @@ void httpRequest(String type, String id) {
     WiFiClient client;
     HTTPClient http;
     Serial.print("[HTTP] begin...\n");
-    if (http.begin(client, "http://192.168.29.192:3000/" + type + "/id=" + id)) {
+    if (http.begin(client, "http://192.168.29.192:5000/" + type + "/id=" + id)) {
       Serial.print("[HTTP] GET...\n");
       int httpCode = http.GET();
 
@@ -59,7 +59,7 @@ void loop() {
       for (byte i = 0; i < 4; i++) {
         tag += rfid.uid.uidByte[i];
       }
-      httpRequest("shelf_A", tag);
+      httpRequest("EI1001", tag);
       Serial.print("tag: ");
       Serial.println(tag);
       tag = "";
