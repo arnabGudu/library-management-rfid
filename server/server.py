@@ -1,18 +1,7 @@
 from flask import Flask, render_template, request;
 from flask_socketio import SocketIO, send
-
-import firebase_admin
-from firebase_admin import credentials
-from firebase_admin import db
-import socket
-
 import argparse
 import sqlite3
-
-cred = credentials.Certificate('serviceAccountKey.json')
-firebase_admin.initialize_app(cred, {
-    'databaseURL': 'https://library-management-1a20f-default-rtdb.firebaseio.com/'
-})
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'mysecret'
@@ -143,11 +132,4 @@ if __name__ == '__main__':
     parser.add_argument('--host', type=str, default='0.0.0.0')
     parser.add_argument('--port', type=int, default=5000)
     args = parser.parse_args()
-    
-    # Update private IP address in Firebase
-    hostname = socket.gethostname()
-    ip_address = socket.gethostbyname(hostname)
-    ref = db.reference('ddns')
-    ref.update({'server': str(hostname)})
-
     socketIo.run(app, host=args.host, port=args.port, debug=True)

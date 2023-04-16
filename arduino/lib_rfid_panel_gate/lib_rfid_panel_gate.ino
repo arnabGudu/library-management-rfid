@@ -3,30 +3,17 @@
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 #include <ESP8266HTTPClient.h>
-
-#include <Firebase_ESP_Client.h>
-#include "addons/TokenHelper.h"
-#include "addons/RTDBHelper.h"
-
-#define WIFI_SSID "JioFiber-xDPSy"
-#define WIFI_PASSWORD "gudusanu"
-
-#define API_KEY "AIzaSyCK3l7fGHB1lRGA1UvBhXKBw5zk239Yw70"
-#define DATABASE_URL "https://library-management-1a20f-default-rtdb.firebaseio.com/"
-
-FirebaseData fbdo;
-FirebaseAuth auth;
-FirebaseConfig config;
+#define BUZZ_PIN D4
 
 constexpr uint8_t RST_PIN1 = D2, RST_PIN2 = D1;
-constexpr uint8_t SS_PIN1 = D8, SS_PIN2 = D3, BUZZ_PIN = D4;
+constexpr uint8_t SS_PIN1 = D8, SS_PIN2 = D3;
 
 MFRC522 rfid1(SS_PIN1, RST_PIN1);
 MFRC522 rfid2(SS_PIN2, RST_PIN2);
 
 MFRC522::MIFARE_Key key1, key2;
 
-String tag1, tag2, ip;
+String tag1, tag2;
 
 void setup() {
   Serial.begin(9600);
@@ -36,40 +23,13 @@ void setup() {
   pinMode(BUZZ_PIN, OUTPUT);
   digitalWrite(BUZZ_PIN, HIGH);
 
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  WiFi.begin("nowifi", "gudusanu");
   Serial.print("Connecting");
   while (WiFi.status() != WL_CONNECTED) {
     delay(1000);
     Serial.print(".");
   }
   Serial.println("\nConnected to WiFi Network");
-
-  // Firebase DDNS
-  bool signupOK = false;
-  config.api_key = API_KEY;
-  config.database_url = DATABASE_URL;
-
-  if (Firebase.signUp(&config, &auth, "", "")) {
-    Serial.println("ok");
-    signupOK = true;
-  }
-  else {
-    Serial.printf("%s\n", config.signer.signupError.message.c_str());
-  }
-
-  config.token_status_callback = tokenStatusCallback;
-
-  Firebase.begin(&config, &auth);
-  Firebase.reconnectWiFi(true);
-
-  if (Firebase.ready() && signupOK) {
-    if (Firebase.RTDB.getString(&fbdo, "/ddns/server")) {
-      ip = fbdo.stringData();
-      Serial.println(ip);
-    }
-    else
-      Serial.println(fbdo.errorReason());
-  }
 }
 
 void httpRequest(String type, String id) {
@@ -77,7 +37,7 @@ void httpRequest(String type, String id) {
     WiFiClient client;
     HTTPClient http;
     Serial.print("[HTTP] begin...\n");
-    if (http.begin(client, "http://" + ip + ":5000/" + type + "/id=" + id)) {
+    if (http.begin(client, "http://laptop-sdp89t6f.local:5000/" + type + "/id=" + id)) {
       Serial.print("[HTTP] GET...\n");
       int httpCode = http.GET();
 
