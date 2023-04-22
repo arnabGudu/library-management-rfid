@@ -1,0 +1,6 @@
+[submodule "circuit/Nodemcu_esp8266_eagle_lib"]
+	path = circuit/Nodemcu_esp8266_eagle_lib
+	url = git@github.com:HarishMohanty/Nodemcu_esp8266_eagle_lib.git
+[submodule "circuit/reader-hw"]
+	path = circuit/reader-hw
+	url = git@github.com:fmfi-svt-deadlock/reader-hw.git
